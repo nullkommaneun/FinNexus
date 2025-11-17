@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="de" class="h-full bg-gray-900">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinNexus - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Einfache Scrollbar-Styles für die Debug-Konsole */
+        #debug-console::-webkit-scrollbar { width: 4px; }
+        #debug-console::-webkit-scrollbar-thumb { background: #4a5568; border-radius: 4px; }
+        #debug-console::-webkit-scrollbar-track { background: #1a202c; }
+    </style>
+</head>
+<body class="h-full text-gray-200">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <header class="flex justify-between items-center mb-6">
+            <h1 class="text-4xl font-bold text-white">FinNexus 🚀</h1>
+            <div>
+                <button id="btn-toggle-audit" class="bg-gray-700 hover:bg-gray-600 text-sm font-medium py-2 px-4 rounded-lg mr-2">
+                    Audit-Modul
+                </button>
+                <button id="btn-toggle-debug" class="bg-gray-700 hover:bg-gray-600 text-sm font-medium py-2 px-4 rounded-lg">
+                    Debugger
+                </button>
+            </div>
+        </header>
+
+        <main class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+
+            <section class="md:col-span-2 lg:col-span-2 p-6 bg-gray-800 rounded-2xl shadow-lg">
+                <h2 class="text-sm font-medium text-gray-400 mb-1">Gesamtvermögen</h2>
+                <div class="text-5xl font-bold text-white" id="big-number">
+                    102.310,50 €
+                </div>
+                <div class="text-lg text-green-400" id="big-number-change">
+                    +2.5% vs. Vormonat
+                </div>
+            </section>
+
+            <section class="md:col-span-1 lg:col-span-2 p-6 bg-gray-800 rounded-2xl shadow-lg">
+                <h2 class="text-sm font-medium text-gray-400 mb-3">Markt-Radar</h2>
+                <div class="flex justify-between space-x-4">
+                    <div id="market-btc">
+                        <span class="text-lg font-semibold block">Bitcoin</span>
+                        <span class="text-xl text-yellow-400">... Lade ...</span>
+                    </div>
+                    <div id="market-sp500">
+                        <span class="text-lg font-semibold block">S&P 500</span>
+                        <span class="text-xl text-gray-400">... Lade ...</span>
+                    </div>
+                    <div id="market-inflation">
+                        <span class="text-lg font-semibold block">Inflation (DE)</span>
+                        <span class="text-xl text-red-400">... Lade ...</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="md:col-span-3 lg:col-span-2 p-6 bg-gray-800 rounded-2xl shadow-lg">
+                <h2 class="text-2xl font-semibold mb-4">Monats-Check (Cashflow)</h2>
+                <div>
+                    <div class="mb-2">
+                        <span class="text-green-400">Einnahmen:</span>
+                        <span class="float-right font-mono" id="cashflow-income">...</span>
+                    </div>
+                    <div class="mb-2">
+                        <span class="text-red-400">Konsum-Ausgaben:</span>
+                        <span class="float-right font-mono" id="cashflow-consumption">...</span>
+                    </div>
+                    <div class="mb-2">
+                        <span class="text-blue-400">Investitionen:</span>
+                        <span class="float-right font-mono" id="cashflow-investment">...</span>
+                    </div>
+                </div>
+                <h3 class="text-lg font-semibold mt-6 mb-2">Top-Ausgaben</h3>
+                <div id="cashflow-top-categories">
+                    <p class="text-gray-500">Keine Transaktionen importiert.</p>
+                </div>
+                <h3 class="text-lg font-semibold mt-6 mb-2">PDF-Import (DKB)</h3>
+                <input type="file" id="pdf-upload-input" class="block w-full text-sm text-gray-400
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-full file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-indigo-600 file:text-white
+                    hover:file:bg-indigo-700"/>
+            </section>
+
+            <section class="md:col-span-3 lg:col-span-2 p-6 bg-gray-800 rounded-2xl shadow-lg">
+                <h2 class="text-2xl font-semibold mb-4">Vermögensbilanz (Assets)</h2>
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="flex-1" id="asset-chart-container">
+                        <div class="w-full h-48 bg-gray-700 rounded-lg flex items-center justify-center text-gray-500">Donut-Chart</div>
+                    </div>
+                    <div class="flex-1" id="asset-list">
+                        <p class="text-gray-500">Keine Assets angelegt.</p>
+                        </div>
+                </div>
+                <button id="btn-add-asset" class="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg">
+                    Neuen Vermögenswert hinzufügen
+                </button>
+            </section>
+
+            <section class="md:col-span-3 lg:col-span-4 p-6 bg-gray-800 rounded-2xl shadow-lg">
+                <h2 class="text-2xl font-semibold mb-4">Navigator</h2>
+                <div id="navigator-alerts" class="space-y-3">
+                    <div class="p-3 bg-gray-700 rounded-lg flex items-center">
+                        <span class="text-xl mr-3">💡</span>
+                        <span>Keine neuen Hinweise.</span>
+                    </div>
+                    </div>
+            </section>
+
+        </main>
+        
+        <aside id="nfr-debug-panel" class="hidden fixed bottom-0 right-0 h-1/3 w-full md:w-1/2 lg:w-1/3 bg-gray-900 border-t-2 border-indigo-500 shadow-2xl p-4 z-50">
+            <h3 class="text-lg font-semibold mb-2">App-Interner Debugger</h3>
+            <div id="debug-console" class="h-full overflow-y-auto pb-16 font-mono text-sm bg-gray-950 p-2 rounded">
+                </div>
+        </aside>
+
+        <div id="nfr-audit-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40 p-4">
+            <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl max-w-2xl w-full">
+                <h2 class="text-2xl font-semibold mb-6">Finanz-Validierungs-Modul (Rechenkontrolle)</h2>
+                
+                <h3 class="text-lg font-semibold text-gray-400 mb-2">Validierung: Gesamtvermögen</h3>
+                <div id="audit-calculation" class="font-mono text-lg space-y-2">
+                    <div><span class="inline-block w-48">Liquide (Giro):</span><span>1.214,10 €</span></div>
+                    <div><span class="inline-block w-48">Krypto (Manuell):</span><span>25.000,00 €</span></div>
+                    <div><span class="inline-block w-48">Broker (Manuell):</span><span>21.000,00 €</span></div>
+                    <div><span class="inline-block w-48">Vorsorge (Manuell):</span><span>55.096,40 €</span></div>
+                    <hr class="border-gray-600 my-2">
+                    <div><span class="inline-block w-48">BERECHNETE SUMME:</span><span>102.310,50 €</span></div>
+                    <div><span class="inline-block w-48">ANGEZEIGTER WERT:</span><span>102.310,50 €</span></div>
+                </div>
+                <div class="mt-4 text-2xl font-bold text-green-400" id="audit-status">
+                    [Status: OK ✔]
+                </div>
+                
+                <button id="btn-close-audit" class="mt-8 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg">
+                    Schließen
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Hier wird die gesamte App-Logik implementiert.
+        // (Module für localStorage, PDF-Parsing, API-Aufrufe, UI-Updates etc.)
+        
+        // --- Globale Module (Platzhalter) ---
+        
+        /**
+         * NFR 1: App-Interner Debugger
+         * Globale Logger-Klasse, wie im Briefing gefordert.
+         */
+        window.appLogger = {
+            consoleElement: document.getElementById('debug-console'),
+            
+            log: function(level, ...args) {
+                const now = new Date().toLocaleTimeString();
+                const msg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
+                
+                const entry = document.createElement('div');
+                const levelColors = {
+                    DEBUG: 'text-gray-400',
+                    INFO: 'text-blue-400',
+                    WARN: 'text-yellow-400',
+                    ERROR: 'text-red-500 font-bold'
+                };
+                entry.className = `${levelColors[level] || 'text-gray-400'}`;
+                entry.innerHTML = `<span class="mr-2">${now} [${level}]</span> ${msg}`;
+                
+                this.consoleElement.appendChild(entry);
+                this.consoleElement.scrollTop = this.consoleElement.scrollHeight; // Auto-scroll
+                
+                // Auch in der echten Konsole loggen, falls verfügbar
+                console[level.toLowerCase()]?.(now, ...args);
+            },
+            
+            debug: function(...args) { this.log('DEBUG', ...args); },
+            info: function(...args) { this.log('INFO', ...args); },
+            warn: function(...args) { this.log('WARN', ...args); },
+            error: function(...args) { this.log('ERROR', ...args); }
+        };
+
+        /**
+         * App-Hauptmodul (IIFE - Immediately Invoked Function Expression)
+         * Kapselt die gesamte Logik, um den globalen Scope sauber zu halten.
+         */
+        (function(logger) {
+            
+            'use strict';
+            
+            logger.info('FinNexus App initialisiert.');
+
+            // --- DOM-Elemente ---
+            const auditModal = document.getElementById('nfr-audit-modal');
+            const debugPanel = document.getElementById('nfr-debug-panel');
+            
+            // --- Event Listener für NFR-Buttons ---
+            
+            // Audit-Modul
+            document.getElementById('btn-toggle-audit').addEventListener('click', () => {
+                logger.debug('Öffne Audit-Modul.');
+                auditModal.classList.remove('hidden');
+            });
+            document.getElementById('btn-close-audit').addEventListener('click', () => {
+                logger.debug('Schließe Audit-Modul.');
+                auditModal.classList.add('hidden');
+            });
+            
+            // Debug-Panel
+            document.getElementById('btn-toggle-debug').addEventListener('click', () => {
+                logger.debug('Toggle Debug-Panel.');
+                debugPanel.classList.toggle('hidden');
+            });
+
+            // --- HIER STARTET DIE KERN-APP-LOGIK ---
+            // 1. Lade Daten aus localStorage
+            // 2. Rufe APIs ab (Markt-Radar)
+            // 3. Initialisiere PDF-Upload-Listener
+            // 4. Initialisiere Asset-CRUD-Listener
+            // 5. Rendere das Dashboard
+            
+            logger.info('App-Logik (Platzhalter) geladen.');
+            
+            // Beispiel-Log für Demo
+            setTimeout(() => {
+                logger.warn("Markt-API (S&P 500) konnte nicht erreicht werden (Beispiel-Log).");
+            }, 2000);
+
+        })(window.appLogger); // Das globale Logger-Modul wird injiziert
+
+    </script>
+</body>
+</html>
