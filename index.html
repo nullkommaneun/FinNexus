@@ -7,358 +7,118 @@
     <meta name="description" content="Private Client-Side Finance Dashboard">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Custom Scrollbar für den Debugger */
-        .debug-scroll::-webkit-scrollbar { width: 8px; }
-        .debug-scroll::-webkit-scrollbar-track { background: #1f2937; }
-        .debug-scroll::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
-        
-        /* Glassmorphism Utility */
-        .glass-panel {
-            background: rgba(31, 41, 55, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans antialiased min-h-screen flex flex-col pb-32">
+<body class="bg-gray-900 text-gray-100 font-sans antialiased min-h-screen flex flex-col pb-32 selection:bg-blue-500 selection:text-white">
 
     <header class="w-full p-4 flex justify-between items-center border-b border-gray-800 bg-gray-900/90 sticky top-0 z-40 backdrop-blur">
-        <div>
-            <h1 class="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-teal-400">
-                FinNexus 🚀
-            </h1>
-            <p class="text-xs text-gray-500 uppercase tracking-wider">Private Finance Cockpit</p>
+        <div class="flex items-center gap-3">
+            <div class="h-8 w-8 bg-gradient-to-br from-blue-500 to-teal-400 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20">FN</div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-white leading-none">FinNexus</h1>
+                <p class="text-[10px] text-gray-500 uppercase tracking-wider">Private Core</p>
+            </div>
         </div>
         <div class="flex gap-2">
-            <button id="btn-toggle-audit" class="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition text-sm border border-gray-700" title="Audit Log öffnen">
-                ⚖️ Audit
-            </button>
-            <button id="btn-toggle-debug" class="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition text-sm border border-gray-700" title="Debugger öffnen">
-                🐞 Debug
-            </button>
+            <button id="btn-toggle-audit" class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition" title="Audit">⚖️</button>
+            <button id="btn-toggle-debug" class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition" title="Debug">🐞</button>
         </div>
     </header>
 
-    <main class="flex-grow p-4 max-w-7xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <main class="flex-grow p-4 max-w-7xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
 
         <section class="col-span-1 md:col-span-2 lg:col-span-2 glass-panel rounded-2xl p-6 relative overflow-hidden">
-            <div class="absolute top-0 right-0 p-4 opacity-10 text-9xl">📈</div>
-            <h2 class="text-sm uppercase text-gray-400 font-semibold mb-2">Gesamtvermögen</h2>
-            <div class="flex items-end gap-4">
-                <span class="text-5xl font-bold text-white" id="display-total-wealth">--- €</span>
-                <span class="text-sm px-2 py-1 rounded bg-green-900/50 text-green-400 mb-2">
-                    +0.0% vs Vormonat
-                </span>
-            </div>
-            <p class="text-xs text-gray-500 mt-2">Berechnet aus lokalen Assets & Cashflow.</p>
-        </section>
-
-        <section class="col-span-1 glass-panel rounded-2xl p-6">
-            <h2 class="text-sm uppercase text-gray-400 font-semibold mb-4 flex justify-between">
-                <span>🌍 Markt-Radar</span>
-                <span class="text-xs text-gray-600 animate-pulse">Live</span>
-            </h2>
-            <div class="space-y-4">
-                <div class="flex justify-between items-center border-b border-gray-700 pb-2" id="market-btc">
-                    <span class="flex items-center gap-2">🟠 Bitcoin</span>
-                    <span class="text-xl text-gray-500">Lade...</span>
-                </div>
-                <div class="flex justify-between items-center border-b border-gray-700 pb-2" id="market-sp500">
-                    <span class="flex items-center gap-2">🇺🇸 S&P 500</span>
-                    <span class="text-xl text-gray-500">---</span>
-                </div>
-                <div class="flex justify-between items-center" id="market-inflation">
-                    <span class="flex items-center gap-2">🇩🇪 VPI (Inflation)</span>
-                    <span class="text-xl text-gray-500">---</span>
-                </div>
+            <div class="absolute -top-6 -right-6 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <h2 class="text-xs uppercase text-gray-400 font-bold tracking-widest mb-2">Netto-Vermögen</h2>
+            <div class="flex flex-col sm:flex-row sm:items-end gap-4">
+                <span class="text-4xl sm:text-5xl font-bold text-white tracking-tight" id="display-total-wealth">0,00 €</span>
             </div>
         </section>
 
-        <section class="col-span-1 glass-panel rounded-2xl p-6 border-l-4 border-blue-500">
-            <h2 class="text-sm uppercase text-gray-400 font-semibold mb-4">💸 DKB Import</h2>
-            <div class="flex flex-col gap-3">
-                <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-800 hover:bg-gray-700 transition">
-                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                        <svg class="w-8 h-8 mb-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/></svg>
-                        <p class="text-sm text-gray-400"><span class="font-semibold">Klicken zum Upload</span></p>
-                        <p class="text-xs text-gray-500">PDF (Lokal verarbeitet)</p>
-                    </div>
-                    <input id="input-pdf-upload" type="file" class="hidden" accept="application/pdf" />
-                </label>
-                <div class="text-xs text-center text-gray-500 mt-1">Kein Server-Upload. Daten bleiben im RAM.</div>
+        <section class="col-span-1 glass-panel rounded-2xl p-6 flex flex-col justify-center relative">
+            <h2 class="text-xs uppercase text-gray-400 font-bold tracking-widest mb-4">Markt Kontext</h2>
+            <div class="text-sm text-gray-500">
+                Marktdaten werden initialisiert...
             </div>
         </section>
 
-        <section class="col-span-1 md:col-span-2 glass-panel rounded-2xl p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-sm uppercase text-gray-400 font-semibold">📊 Meine Assets</h2>
-                <button class="text-xs bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded text-white transition">+ Asset</button>
+        <section class="col-span-1 md:col-span-3 glass-panel rounded-2xl p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-teal-400"></span> Meine Assets
+                </h2>
+                <button id="btn-open-asset-modal" class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition shadow-lg shadow-blue-900/20 font-medium flex items-center gap-2">
+                    <span>+</span> Hinzufügen
+                </button>
             </div>
-            <div class="overflow-x-auto">
+            
+            <div class="overflow-x-auto -mx-6 px-6">
                 <table class="w-full text-sm text-left text-gray-400">
-                    <thead class="text-xs text-gray-500 uppercase bg-gray-800">
+                    <thead class="text-xs text-gray-500 uppercase border-b border-gray-700/50">
                         <tr>
-                            <th scope="col" class="px-4 py-3 rounded-l-lg">Asset Name</th>
-                            <th scope="col" class="px-4 py-3">Kategorie</th>
-                            <th scope="col" class="px-4 py-3 text-right rounded-r-lg">Wert</th>
+                            <th class="px-4 py-3">Name</th>
+                            <th class="px-4 py-3">Kategorie</th>
+                            <th class="px-4 py-3 text-right">Wert</th>
+                            <th class="px-4 py-3 text-right">Aktion</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr class="border-b border-gray-800 hover:bg-gray-800/50">
-                            <td class="px-4 py-3 font-medium text-white">Beispiel: ETF World</td>
-                            <td class="px-4 py-3">Depot</td>
-                            <td class="px-4 py-3 text-right">0,00 €</td>
-                        </tr>
-                    </tbody>
+                    <tbody id="asset-table-body">
+                        </tbody>
                 </table>
-                <div class="text-center py-8 text-gray-600 italic">
-                    Daten werden aus localStorage geladen...
-                </div>
-            </div>
-        </section>
-
-        <section class="col-span-1 md:col-span-3 glass-panel rounded-2xl p-4 flex items-start gap-4 bg-gradient-to-r from-gray-800 to-gray-900">
-            <div class="text-3xl">🧭</div>
-            <div>
-                <h3 class="font-bold text-white">Navigator</h3>
-                <p class="text-sm text-gray-400">Keine dringenden Aktionen erkannt. Ihr finanzieller Autopilot ist aktiv.</p>
             </div>
         </section>
 
     </main>
 
-    <div id="nfr-audit-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex justify-center items-center p-4">
-        <div class="bg-gray-900 border border-gray-700 w-full max-w-2xl rounded-xl shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center">
-                <h3 class="text-lg font-bold text-green-400">⚖️ Finanz-Audit & Validierung</h3>
-                <button id="btn-close-audit" class="text-gray-400 hover:text-white">&times;</button>
-            </div>
-            <div class="p-6 overflow-y-auto">
-                <p class="text-sm text-gray-400 mb-4">Transparenter Nachweis der Berechnung ("Big Number").</p>
-                <div class="bg-black rounded p-4 font-mono text-sm text-green-300">
-                    ROOT: Summe(Assets) + Cash<br>
-                    --------------------------------<br>
-                    + Depot:        0.00 €<br>
-                    + Crypto:       0.00 €<br>
-                    + Cash (Bank):  0.00 €<br>
-                    --------------------------------<br>
-                    = TOTAL:        0.00 €<br>
-                    <span class="text-gray-500 text-xs mt-2 block">// Validiert am: <span id="audit-timestamp">Jetzt</span></span>
+    <div id="modal-add-asset" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex justify-center items-center p-4">
+        <div class="bg-gray-900 border border-gray-700 w-full max-w-md rounded-xl shadow-2xl modal-animate p-6">
+            <h3 class="text-lg font-bold text-white mb-4">Neues Asset erfassen</h3>
+            <form id="form-add-asset" class="space-y-4">
+                <div>
+                    <label class="block text-xs text-gray-400 uppercase mb-1">Bezeichnung</label>
+                    <input type="text" id="input-asset-name" class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white focus:border-blue-500 focus:outline-none" placeholder="z.B. ETF World" required>
                 </div>
-            </div>
+                <div>
+                    <label class="block text-xs text-gray-400 uppercase mb-1">Kategorie</label>
+                    <select id="input-asset-category" class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white focus:border-blue-500 focus:outline-none">
+                        <option value="Depot">Wertpapier-Depot</option>
+                        <option value="Krypto">Kryptowährung</option>
+                        <option value="Immobilie">Immobilie</option>
+                        <option value="Konto">Tagesgeld/Konto</option>
+                        <option value="Sonstiges">Sonstiges (Gold, Uhren)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 uppercase mb-1">Aktueller Wert (€)</label>
+                    <input type="number" step="0.01" id="input-asset-value" class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white focus:border-blue-500 focus:outline-none" placeholder="0.00" required>
+                </div>
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" id="btn-cancel-asset" class="px-4 py-2 text-gray-400 hover:text-white text-sm">Abbrechen</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium">Speichern</button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <div id="nfr-debug-panel" class="fixed bottom-0 left-0 right-0 h-64 bg-gray-950 border-t border-gray-800 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] transition-transform transform hidden flex flex-col">
-        <div class="flex justify-between items-center p-2 bg-gray-900 border-b border-gray-800 px-4">
-            <span class="text-xs font-mono text-yellow-500">🐞 App-Interner Debugger</span>
-            <div class="flex gap-4">
-                 <button onclick="document.getElementById('debug-console').innerHTML = ''" class="text-xs text-gray-500 hover:text-white">Clear</button>
-                 </div>
-        </div>
-        <div id="debug-console" class="flex-grow p-4 font-mono text-xs overflow-y-auto debug-scroll bg-black/50">
+    <div id="nfr-audit-modal" class="fixed inset-0 z-50 hidden bg-black/90 flex justify-center items-center p-4">
+        <div class="bg-gray-900 border border-green-900/30 w-full max-w-lg rounded p-6 font-mono">
+            <div class="flex justify-between mb-4 text-green-500">
+                <span>SYSTEM AUDIT</span>
+                <button id="btn-close-audit">&times;</button>
             </div>
+            <div id="audit-content" class="text-green-400 text-sm whitespace-pre-wrap">Generating...</div>
+        </div>
     </div>
 
-    <script>
-        // --- Globale Module (Basierend auf Ihrem Briefing) ---
-        
-        /**
-         * NFR 1: App-Interner Debugger
-         * Globale Logger-Klasse.
-         */
-        window.appLogger = {
-            consoleElement: document.getElementById('debug-console'),
-            
-            log: function(level, ...args) {
-                const now = new Date().toLocaleTimeString();
-                // Konvertiert alle Argumente in einen String
-                const msg = args.map(arg => {
-                    if (arg instanceof Error) {
-                        return arg.stack || arg.message;
-                    }
-                    return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-                }).join(' ');
-                
-                const entry = document.createElement('div');
-                const levelColors = {
-                    DEBUG: 'text-gray-500',
-                    INFO: 'text-blue-400',
-                    WARN: 'text-yellow-400',
-                    ERROR: 'text-red-500 font-bold'
-                };
-                // Tailwind Klassen für Log-Eintrag
-                entry.className = `${levelColors[level] || 'text-gray-400'} mb-1 break-all font-mono`; 
-                entry.innerHTML = `<span class="opacity-40 mr-2">[${now}]</span><span class="font-bold mr-1">${level}:</span> <span>${msg}</span>`;
-                
-                if(this.consoleElement) {
-                    this.consoleElement.appendChild(entry);
-                    this.consoleElement.scrollTop = this.consoleElement.scrollHeight; // Auto-scroll
-                }
-                
-                // Auch in der echten Konsole loggen, falls verfügbar
-                const consoleLevel = level.toLowerCase();
-                if (typeof console[consoleLevel] === 'function') {
-                    console[consoleLevel](now, ...args);
-                } else {
-                    console.log(now, ...args);
-                }
-            },
-            
-            debug: function(...args) { this.log('DEBUG', ...args); },
-            info: function(...args) { this.log('INFO', ...args); },
-            warn: function(...args) { this.log('WARN', ...args); },
-            error: function(...args) { this.log('ERROR', ...args); }
-        };
+    <div id="nfr-debug-panel" class="fixed bottom-0 left-0 right-0 h-48 bg-gray-950 border-t border-gray-800 z-50 hidden flex flex-col shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+        <div class="flex justify-between items-center p-2 bg-gray-900 px-4 border-b border-gray-800">
+            <span class="text-[10px] font-mono text-yellow-500 uppercase">System Log</span>
+            <button onclick="document.getElementById('debug-console').innerHTML = ''" class="text-[10px] text-gray-500 hover:text-white">CLEAR</button>
+        </div>
+        <div id="debug-console" class="flex-grow p-4 custom-scroll overflow-y-auto text-xs font-mono"></div>
+    </div>
 
-        /**
-         * App-Hauptmodul (IIFE - Immediately Invoked Function Expression)
-         */
-        (function(logger) {
-            
-            'use strict';
-            
-            // --- DOM-Elemente-Sammlung ---
-            const ui = {
-                auditModal: document.getElementById('nfr-audit-modal'),
-                debugPanel: document.getElementById('nfr-debug-panel'),
-                marketBtc: document.getElementById('market-btc').querySelector('span:last-child'),
-                marketSp500: document.getElementById('market-sp500').querySelector('span:last-child'),
-                marketInflation: document.getElementById('market-inflation').querySelector('span:last-child'),
-            };
-
-            // --- NFR Event Listeners ---
-            function initNFRListeners() {
-                // Audit-Modul
-                const btnOpenAudit = document.getElementById('btn-toggle-audit');
-                const btnCloseAudit = document.getElementById('btn-close-audit');
-
-                if(btnOpenAudit) btnOpenAudit.addEventListener('click', () => {
-                    logger.debug('Öffne Audit-Modul.');
-                    ui.auditModal.classList.remove('hidden');
-                });
-                
-                if(btnCloseAudit) btnCloseAudit.addEventListener('click', () => {
-                    logger.debug('Schließe Audit-Modul.');
-                    ui.auditModal.classList.add('hidden');
-                });
-                
-                // Debug-Panel
-                const btnDebug = document.getElementById('btn-toggle-debug');
-                if(btnDebug) btnDebug.addEventListener('click', () => {
-                    logger.debug('Toggle Debug-Panel.');
-                    ui.debugPanel.classList.toggle('hidden');
-                });
-
-                logger.info('NFR-Listener (Audit, Debug) initialisiert.');
-            }
-
-            // --- SEKTION 5: Markt-Radar ---
-
-            /**
-             * Ruft den Bitcoin-Preis von CoinGecko ab.
-             */
-            async function fetchBitcoinPrice() {
-                // Verhindert CORS Fehler beim lokalen Testen oft nicht, aber auf GH Pages okay.
-                // Falls Rate Limit greift, wird Catch ausgeführt.
-                const url = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=eur';
-                logger.debug('Rufe BTC-Preis ab von CoinGecko...');
-                
-                try {
-                    const response = await fetch(url);
-                    if (!response.ok) {
-                        throw new Error(`CoinGecko API Fehler: Status ${response.status}`);
-                    }
-                    const data = await response.json();
-                    
-                    if (data && data.bitcoin && data.bitcoin.eur) {
-                        const price = data.bitcoin.eur;
-                        logger.info(`BTC-Preis erfolgreich geladen: ${price} EUR`);
-                        if(ui.marketBtc) {
-                            ui.marketBtc.textContent = `${price.toLocaleString('de-DE')} €`;
-                            ui.marketBtc.className = "text-xl font-bold text-yellow-400";
-                        }
-                    } else {
-                        throw new Error('CoinGecko JSON-Antwort hat ein unerwartetes Format.');
-                    }
-                } catch (error) {
-                    logger.error('Fehler beim Abruf des BTC-Preises:', error);
-                    if(ui.marketBtc) {
-                        ui.marketBtc.textContent = 'Fehler';
-                        ui.marketBtc.className = "text-xl text-red-500";
-                    }
-                }
-            }
-
-            /**
-             * Platzhalter-Funktion für S&P 500-Daten.
-             */
-            async function fetchSP500Data() {
-                logger.warn('S&P 500-Abruf ist ein Platzhalter (Mock).');
-                if(ui.marketSp500) {
-                    ui.marketSp500.textContent = 'Mock: 4.500';
-                    ui.marketSp500.className = "text-xl text-gray-500 italic";
-                }
-            }
-
-            /**
-             * Platzhalter-Funktion für Inflations-Daten (VPI DE).
-             */
-            async function fetchInflationData() {
-                logger.warn('Inflations-Abruf ist ein Platzhalter (Mock).');
-                if(ui.marketInflation) {
-                    ui.marketInflation.textContent = 'Mock: 2.4%';
-                    ui.marketInflation.className = "text-xl text-gray-500 italic";
-                }
-            }
-
-            /**
-             * Initialisiert alle Abrufe für das Markt-Radar.
-             */
-            function initMarketRadar() {
-                logger.info('Initialisiere Sektion 5: Markt-Radar.');
-                
-                // Führt alle API-Aufrufe parallel aus
-                Promise.all([
-                    fetchBitcoinPrice(),
-                    fetchSP500Data(),
-                    fetchInflationData()
-                ]);
-            }
-
-            // --- HIER STARTET DIE KERN-APP-LOGIK ---
-
-            /**
-             * Haupt-Initialisierungsfunktion der App
-             */
-            function init() {
-                logger.info('FinNexus App initialisiert (v 2.0 Modern).');
-                
-                // 1. NFR Module (Debugger, Audit) initialisieren
-                initNFRListeners();
-                
-                // 2. Markt-Radar (Sektion 5) laden
-                initMarketRadar();
-                
-                // 3. Lade Daten aus localStorage (Platzhalter)
-                logger.debug('Lade Daten aus localStorage (TODO)...');
-                
-                // 4. Initialisiere PDF-Upload-Listener (Platzhalter)
-                logger.debug('Initialisiere PDF-Listener (TODO)...');
-                
-                // 5. Initialisiere Asset-CRUD-Listener (Platzhalter)
-                logger.debug('Initialisiere Asset-CRUD-Listener (TODO)...');
-                
-                // 6. Rendere das Dashboard (Platzhalter)
-                logger.debug('Rendere Dashboard (TODO)...');
-            }
-
-            // App starten, sobald das DOM geladen ist
-            document.addEventListener('DOMContentLoaded', init);
-
-        })(window.appLogger);
-    </script>
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>
+ 
